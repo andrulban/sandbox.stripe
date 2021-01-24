@@ -21,6 +21,7 @@ out
 gen
 */target/*
 */logs/*
+target/*
 
 ### NetBeans ###
 /nbproject/private/

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:remove="all">Password reset mail</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<table width="100%" cellpadding="0" cellspacing="0">
+    <tr bgcolor="#337AB8" style="height: 75px;">
+        <td align="center"><h1>Password reset</h1></td>
+    </tr>
+    <tr bgcolor="ffffff">
+        <td height="100" align="center"><p>To reset your password, click the link below:</p><h2 th:text="${resetLink}">---</h2></td>
+    </tr>
+    <tr bgcolor="ffffff">
+        <td height="100" align="center"><h3>Have a nice day!</h3></td>
+    </tr>
+    <tr bgcolor="ffffff">
+        <td height="100" align="center"><h3>This message was automatically generated!</h3></td>
+    </tr>
+</table>
+</body>
+</html>
