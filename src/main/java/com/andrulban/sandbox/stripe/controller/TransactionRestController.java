@@ -35,6 +35,14 @@ public class TransactionRestController {
   }
 
   @PreAuthorize("hasAnyRole('CUSTOMER')")
+  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<TransactionPreviewDto> getTransactionById(
+      @PathVariable("id") Long id, Authentication authentication) {
+    CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+    return ResponseEntity.ok(transactionService.getTransactionById(id, customUserDetails.getId()));
+  }
+
+  @PreAuthorize("hasAnyRole('CUSTOMER')")
   @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity processTransaction(
       @Valid @RequestBody TransactionCreationDto transactionCreationDto,

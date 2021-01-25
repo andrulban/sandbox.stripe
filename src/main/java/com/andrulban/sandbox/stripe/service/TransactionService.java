@@ -10,5 +10,7 @@ public interface TransactionService {
   Page<TransactionPreviewDto> filterTransactions(
       TransactionFilteringPredicate transactionFilteringPredicate, long userId);
 
+  TransactionPreviewDto getTransactionById(long id, long userId);
+
   long processTransaction(TransactionCreationDto transactionCreationDto, long userId);
 }

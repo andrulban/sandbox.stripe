@@ -31,8 +31,7 @@ import java.util.Optional;
 
 import static com.andrulban.sandbox.stripe.entity.Transaction.Currency.EUR;
 import static com.andrulban.sandbox.stripe.entity.Transaction.Status.SUCCESS;
-import static com.andrulban.sandbox.stripe.exception.ExceptionType.ERROR;
-import static com.andrulban.sandbox.stripe.exception.ExceptionType.VALIDATION_ERROR;
+import static com.andrulban.sandbox.stripe.exception.ExceptionType.*;
 import static com.google.common.truth.Truth.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -94,6 +93,53 @@ public class TransactionServiceImplTest {
     // Assert
     assertThat(result.getContent()).isEmpty();
     assertThat(result.getTotalElements()).isEqualTo(0L);
+  }
+
+  @Test
+  public void getTransactionById_success() {
+    Transaction dbTransaction =
+        Transaction.builder()
+            .id(1L)
+            .description("d")
+            .stripeEmail("st@email.com")
+            .currency(EUR)
+            .amount(300L)
+            .fee(10L)
+            .status(SUCCESS)
+            .userId(1L)
+            .build();
+    when(transactionRepository.findById(any())).thenReturn(Optional.of(dbTransaction));
+
+    TransactionPreviewDto result = transactionService.getTransactionById(1L, 1L);
+
+    assertThat(result.getId()).isEqualTo(dbTransaction.getId());
+    assertThat(result.getDescription()).isEqualTo(dbTransaction.getDescription());
+    assertThat(result.getStripeEmail()).isEqualTo(dbTransaction.getStripeEmail());
+    assertThat(result.getCurrency()).isEqualTo(dbTransaction.getCurrency());
+    assertThat(result.getAmount()).isEqualTo(dbTransaction.getAmount());
+    assertThat(result.getFee()).isEqualTo(dbTransaction.getFee());
+    assertThat(result.getStatus()).isEqualTo(dbTransaction.getStatus());
+  }
+
+  @Test
+  public void getTransactionById_notFound_throwsException() {
+    when(transactionRepository.findById(any())).thenReturn(Optional.empty());
+
+    ApiException thrown =
+        assertThrows(ApiException.class, () -> transactionService.getTransactionById(1L, 1L));
+
+    assertThat(thrown.getStatus()).isEqualTo(NO_RESULT);
+  }
+
+  @Test
+  public void getTransactionById_notOwnedTransaction_throwsException() {
+    Transaction dbTransaction = Transaction.builder().userId(2L).build();
+    when(transactionRepository.findById(any())).thenReturn(Optional.of(dbTransaction));
+
+    ApiException thrown =
+        assertThrows(ApiException.class, () -> transactionService.getTransactionById(1L, 1L));
+
+    assertThat(thrown.getStatus()).isEqualTo(NO_RESULT);
   }
 
   @Test

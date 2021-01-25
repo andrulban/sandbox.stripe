@@ -121,6 +121,24 @@ public class TransactionRestControllerTest {
 
   @Test
   @Customer
+  public void getFileById_success() throws Exception {
+    String description = "First description";
+    int amount = 300;
+    long transactionId = createTransactionDto(description, amount, "1");
+
+    mvc.perform(get("/transactions/" + transactionId))
+        .andDo(print())
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.description", is(description)))
+        .andExpect(jsonPath("$.stripeEmail", is("stripe@gmail.com")))
+        .andExpect(jsonPath("$.currency", is("EUR")))
+        .andExpect(jsonPath("$.amount", is(amount)))
+        .andExpect(jsonPath("$.fee", is(10)))
+        .andExpect(jsonPath("$.status", is("SUCCESS")));
+  }
+
+  @Test
+  @Customer
   public void processTransaction_success() throws Exception {
     // Arrange
     Charge charge = createCharge();
@@ -199,18 +217,24 @@ public class TransactionRestControllerTest {
     assertThat(createTransaction.getErrorMessage()).contains("technical message");
   }
 
-  private void createTransactionDto(String description1, int amount1, String stripeToken)
+  private long createTransactionDto(String description1, int amount1, String stripeToken)
       throws Exception {
     TransactionCreationDto creationDto1 =
         createTransactionCreationDto(description1, amount1, stripeToken);
     when(chargeService.charge(any())).thenReturn(createCharge(stripeToken));
 
-    mvc.perform(
-            post("/transactions")
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(creationDto1)))
-        .andDo(print())
-        .andExpect(status().isCreated());
+    MvcResult transactionCreationResult =
+        mvc.perform(
+                post("/transactions")
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(creationDto1)))
+            .andDo(print())
+            .andExpect(status().isCreated())
+            .andReturn();
+    ;
+
+    String locationHeader = transactionCreationResult.getResponse().getHeader("Location");
+    return Long.valueOf(locationHeader.split("/")[2]);
   }
 
   private static TransactionCreationDto createTransactionCreationDto() {
