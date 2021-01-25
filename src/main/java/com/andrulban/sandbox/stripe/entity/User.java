@@ -3,7 +3,7 @@ package com.andrulban.sandbox.stripe.entity;
 import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
+import java.util.Set;
 
 @Entity
 @Table(uniqueConstraints = {@UniqueConstraint(name = "UK_email", columnNames = "email")})
@@ -12,7 +12,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User extends TimestampEntity implements Serializable {
+public class User extends TimestampEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,6 +46,9 @@ public class User extends TimestampEntity implements Serializable {
 
   @Column(nullable = false)
   private boolean isBlocked;
+
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+  private Set<Transaction> transactions;
 
   public enum UserRole {
     CUSTOMER;

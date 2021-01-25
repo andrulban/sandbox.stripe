@@ -1,5 +1,6 @@
--- TODO Create INSERT or UPDATE logic instead of counting on big ID
-DELETE FROM PUBLIC.USER WHERE ID = 1000000;
+-- TODO: Create INSERT or UPDATE logic instead of counting on big ID and split delete statements to another SQL file
+DELETE FROM PUBLIC.PAYMENT_TRANSACTION;
+DELETE FROM PUBLIC.USER;
 
 -- Hashed password is 'password'
 INSERT INTO PUBLIC.USER (id,

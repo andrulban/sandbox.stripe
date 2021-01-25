@@ -38,8 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Transactional
-@Rollback
 @Sql(executionPhase = BEFORE_TEST_METHOD, scripts = "classpath:sql/user.sql")
 public class UserRestControllerTest {
 
