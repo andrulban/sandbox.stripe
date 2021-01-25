@@ -1,6 +1,9 @@
 package com.andrulban.sandbox.stripe.service.impl;
 
+import com.andrulban.sandbox.stripe.dto.Page;
 import com.andrulban.sandbox.stripe.dto.TransactionCreationDto;
+import com.andrulban.sandbox.stripe.dto.TransactionPreviewDto;
+import com.andrulban.sandbox.stripe.dto.predicate.TransactionFilteringPredicate;
 import com.andrulban.sandbox.stripe.entity.Transaction;
 import com.andrulban.sandbox.stripe.entity.Transaction.Status;
 import com.andrulban.sandbox.stripe.entity.User;
@@ -23,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 import static com.andrulban.sandbox.stripe.entity.Transaction.Currency.EUR;
@@ -61,6 +65,35 @@ public class TransactionServiceImplTest {
             .stripeToken("token")
             .stripeEmail("stripe@gmail.com")
             .build();
+  }
+
+  @Test
+  public void filterTransactions_mapsAllNotNullParamsFromPredicateAndAddsUserId() {
+    // Arrange
+    TransactionFilteringPredicate filteringPredicate =
+        TransactionFilteringPredicate.builder()
+            .description("de")
+            .amount(1L)
+            .amountFrom(1L)
+            .amountTo(1L)
+            .build();
+
+    HashMap<String, Object> filteringMap = new HashMap<>();
+    filteringMap.put("description", "de");
+    filteringMap.put("amount", 1L);
+    filteringMap.put("amountFrom", 1L);
+    filteringMap.put("amountTo", 1L);
+    filteringMap.put("userId", 1L);
+
+    when(transactionRepository.countTransactionsByFilter(eq(filteringMap))).thenReturn(0L);
+
+    // Act
+    Page<TransactionPreviewDto> result =
+        transactionService.filterTransactions(filteringPredicate, 1L);
+
+    // Assert
+    assertThat(result.getContent()).isEmpty();
+    assertThat(result.getTotalElements()).isEqualTo(0L);
   }
 
   @Test

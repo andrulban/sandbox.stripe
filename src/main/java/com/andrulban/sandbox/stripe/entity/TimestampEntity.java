@@ -1,8 +1,14 @@
 package com.andrulban.sandbox.stripe.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.Date;
 
+// TODO create predefined annotation containing most frequently used Lombok annotations
+@Getter
+@Setter
 @MappedSuperclass
 public abstract class TimestampEntity {
 

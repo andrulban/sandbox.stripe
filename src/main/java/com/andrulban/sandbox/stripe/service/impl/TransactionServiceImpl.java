@@ -1,11 +1,15 @@
 package com.andrulban.sandbox.stripe.service.impl;
 
+import com.andrulban.sandbox.stripe.dto.Page;
 import com.andrulban.sandbox.stripe.dto.TransactionCreationDto;
+import com.andrulban.sandbox.stripe.dto.TransactionPreviewDto;
+import com.andrulban.sandbox.stripe.dto.predicate.TransactionFilteringPredicate;
 import com.andrulban.sandbox.stripe.entity.Transaction;
 import com.andrulban.sandbox.stripe.entity.Transaction.Status;
 import com.andrulban.sandbox.stripe.entity.User;
 import com.andrulban.sandbox.stripe.exception.ApiException;
 import com.andrulban.sandbox.stripe.exception.ExceptionType;
+import com.andrulban.sandbox.stripe.mapper.TransactionMapper;
 import com.andrulban.sandbox.stripe.repository.TransactionRepository;
 import com.andrulban.sandbox.stripe.repository.UserRepository;
 import com.andrulban.sandbox.stripe.service.ChargeService;
@@ -18,6 +22,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -37,6 +45,29 @@ public class TransactionServiceImpl implements TransactionService {
     this.chargeService = chargeService;
     this.transactionRepository = transactionRepository;
     this.userRepository = userRepository;
+  }
+
+  @Override
+  public Page<TransactionPreviewDto> filterTransactions(
+      TransactionFilteringPredicate filteringPredicate, long userId) {
+    Map<String, Object> filteringMap = filteringPredicate.getNotNullParams();
+    filteringMap.put("userId", userId);
+
+    List<TransactionPreviewDto> content =
+        transactionRepository
+            .getTransactionsByFilter(
+                filteringMap,
+                filteringPredicate.getSortField(),
+                filteringPredicate.isAscending(),
+                filteringPredicate.getFirstResult(),
+                filteringPredicate.getMaxResults())
+            .stream()
+            .map(TransactionMapper::mapToPreviewDto)
+            .collect(Collectors.toList());
+
+    Long totalElements = transactionRepository.countTransactionsByFilter(filteringMap);
+
+    return new Page<>(content, totalElements);
   }
 
   @Override
